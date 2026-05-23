@@ -1,0 +1,39 @@
+clear; clc; close all;
+
+J_eq = 1.9785e-5; b_eq = 2.1944e-5; L_q = 5.8e-3; 
+P_p = 3; lambda_m_prima = 0.016; r = 120.0;
+alpha_Cu = 3.9e-3; Rs_ref = 1.02; T_ref = 20;
+temp_vec = -15:10:115; 
+Rs_vec = Rs_ref * (1 + alpha_Cu * (temp_vec - T_ref));
+
+colores = jet(length(temp_vec)); 
+figure('Color', [1 1 1]); hold on;
+
+sgrid([0.1 0.22 0.34 0.46 0.5 0.6 0.74 0.86 0.96], [50 100 150 200]);
+h = zeros(length(temp_vec), 1);
+
+leyendas = cell(1, length(temp_vec));
+
+for k = 1:length(temp_vec)
+    Rs = Rs_vec(k);
+    num = [-L_q/r, -Rs/r];
+    den = [J_eq*L_q, (L_q*b_eq + J_eq*Rs), (Rs*b_eq + 1.5*(P_p*lambda_m_prima)^2), 0];
+    sys = tf(num, den);
+    
+    p = pole(sys);
+    z = zero(sys);
+    
+    plot(real(p), imag(p), 'x', 'Color', colores(k,:), 'MarkerSize', 8, 'LineWidth', 1.5);
+    plot(real(z), imag(z), 'o', 'Color', colores(k,:), 'MarkerSize', 8, 'LineWidth', 1.5);
+    
+    h(k) = plot(NaN, NaN, 'Color', colores(k,:), 'LineWidth', 1.5);
+    leyendas{k} = sprintf('T = %d °C', temp_vec(k));
+end
+
+grid on; box off;
+set(gca, 'Color', 'none', 'XColor', 'k', 'YColor', 'k', 'TickDir', 'out');
+xlabel('Parte Real (seconds^{-1})', 'FontWeight', 'bold');
+ylabel('Parte Imaginaria (seconds^{-1})', 'FontWeight', 'bold');
+title('Mapa de Polos y Ceros con Variación Térmica ', 'FontWeight', 'bold');
+legend(h, leyendas, 'Location', 'southwest', 'FontSize', 7);
+hold off;

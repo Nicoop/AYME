@@ -1,0 +1,17 @@
+clc;
+clear;
+close all;
+L_q=5.8;
+L_d=6.6;
+L_Is=0.8;
+P_p=3;
+lambda_m=0.016;
+r=120;
+bl=0.1;
+bm=15*10^-6;
+b_eq=bm+bl/(r^2);
+m=1;
+Jm=14*10^-6;
+Jl=0.0833;
+J_eq=Jm+Jl/(r^2);
+k_l=0.25;
