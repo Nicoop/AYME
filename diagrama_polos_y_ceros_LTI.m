@@ -9,7 +9,7 @@ Rs_vec = Rs_ref * (1 + alpha_Cu * (temp_vec - T_ref));
 colores = jet(length(temp_vec)); 
 figure('Color', [1 1 1]); hold on;
 
-sgrid([0.1 0.22 0.34 0.46 0.5 0.6 0.74 0.86 0.96], [50 100 150 200]);
+sgrid([0.1 0.22 0.34 0.46 0.5 0.6 0.74 0.86 0.96], [50 100 150 175 200]);
 h = zeros(length(temp_vec), 1);
 
 leyendas = cell(1, length(temp_vec));
