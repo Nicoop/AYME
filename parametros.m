@@ -38,9 +38,11 @@ L_q = 5.8 * 10^(-3);
 
 %Inductancia de dispersion
 L_Is = 0.8 *10^(-3);
+L_ls = L_Is;
 
 %Resistencia estator por fase (REF)
 R_sref = 1.02; %[Ohm]
+R_s = R_sref;
 
 %Temperatura de referencia
 T_sref = 20; %[*C]
