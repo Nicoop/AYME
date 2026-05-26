@@ -94,7 +94,7 @@ set(gca, 'XTickLabel', []);
 
 % Subplot 5: Temperatura LTI
 nexttile;
-plot(Ts_LTI.Values, 'LineWidth', 1.5, 'Color', [0.85 0.00 0.55]);
+plot(Ts_LTI.Values, 'LineWidth', 1.5, 'Color', [0.6350 0.0780 0.1840]);
 grid on;
 xlabel('Tiempo [s]','Interpreter', 'latex', 'FontSize', 10);
 ylabel('Temperatura [$^{\circ}$C]', 'Interpreter', 'latex', 'FontSize', 9);
@@ -107,7 +107,7 @@ print('resultado_control_LTI', '-dpng', '-r300');
 %% FIGURA 3: GRAFICOS NL (Ajustado a 4 Subplots - Sin Temperatura)
 %% =========================================================================
 figure('Units', 'inches', 'Position', [1, 1, 6, 8]); 
-t_nl = tiledlayout(5, 1, 'Padding', 'compact', 'TileSpacing', 'compact');
+t_nl = tiledlayout(4, 1, 'Padding', 'compact', 'TileSpacing', 'compact');
 
 % Subplot 1: Corriente NL
 nexttile;
@@ -144,21 +144,8 @@ title('$T_m(t)$', 'Interpreter', 'latex', 'FontSize', 12, 'FontWeight','bold');
 title(t_nl, 'Respuesta Temporal del Modelo No Lineal (NL)', 'Interpreter', 'latex', 'FontSize', 13);
 print('resultado_control_NL', '-dpng', '-r300');
 
-% Subplot 5: Temperatura NL
-nexttile;
-plot(Ts_NL.Values, 'LineWidth', 1.5, 'Color', [0.85 0.00 0.55]);
-grid on;
-xlabel('Tiempo [s]','Interpreter', 'latex', 'FontSize', 10);
-ylabel('Temperatura [$^{\circ}$C]', 'Interpreter', 'latex', 'FontSize', 9);
-title('$T_s(t)$', 'Interpreter', 'latex', 'FontSize', 12, 'FontWeight','bold');
-ax = gca;
-ax.YLim = [20, max([max(Ts_LTI.Values.Data), max(Ts_NL.Values.Data)]) * 1.05];
-
-title(t_nl, 'Respuesta Temporal del Modelo No Lineal (NL)', 'Interpreter', 'latex', 'FontSize', 13);
-print('resultado_control_NL', '-dpng', '-r300');
-
 %% =========================================================================
-%% FIGURA 4: GRÁFICOS COMPARATIVOS ELÉCTRICOS Y MECÁNICOS 
+%% FIGURA 4: GRÁFICOS COMPARATIVOS ELÉCTRICOS Y MECÁNICOS (4 Subplots)
 %% =========================================================================
 figure('Units', 'inches', 'Position', [1, 1, 6, 8]); 
 t_comp = tiledlayout(4, 1, 'Padding', 'compact', 'TileSpacing', 'compact');
@@ -207,7 +194,7 @@ title(t_comp, 'Comparativa de Respuesta Temporal: Modelo LTI vs. NL', 'Interpret
 print('resultado_comparativa_LTI_NL', '-dpng', '-r300');
 
 %% =========================================================================
-%% FIGURA 5: COMPARATIVA TÉRMICA 
+%% FIGURA 5: COMPARATIVA TÉRMICA INDEPENDIENTE (Especificaciones del Usuario)
 %% =========================================================================
 figure('Units', 'inches', 'Position', [1, 1, 6, 3.8]);
 
@@ -222,7 +209,7 @@ plot(Ts_NL.Values.Time,  Ts_NL.Values.Data,  '--', 'LineWidth', 1.8, 'Color', co
 grid on;
 xlabel('Tiempo [s]', 'Interpreter', 'latex', 'FontSize', 10);
 ylabel('Temperatura [$^{\circ}$C]', 'Interpreter', 'latex', 'FontSize', 10);
-title('Comparativa de Dinamica Termica $T_s(t)$: LTI vs. NL', 'Interpreter', 'latex','FontSize', 12, 'FontWeight', 'bold')
+title('Comparativa de Din' 'amica T' 'ermica $T_s(t)$: LTI vs. NL', 'Interpreter', 'latex', 'FontSize', 12, 'FontWeight', 'bold')
 
 % Configuración del eje Y para que empiece estrictamente en 20 y auto-ajuste el máximo
 ax = gca;
