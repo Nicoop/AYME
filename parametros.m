@@ -62,4 +62,8 @@ J_eq = J_m + (1/r^2)*J_l;
 
 b_eq = b_m + (1/r^2)*b_l;
 
+%% Parametros para ubicacion de polos
 
+R_q=5000;
+R_d=5000;
+R_0=5000;
