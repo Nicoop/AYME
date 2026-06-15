@@ -1,25 +1,50 @@
-%% EJECUTAR LA SIMULACIÓN DESDE EL SCRIPT
-simOut = sim('Simulacion_Temporal.slx', 'SimulationMode', 'normal');
+%% =========================================================================
+%% 1. EJECUTAR LAS SIMULACIONES DESDE EL SCRIPT
+%% =========================================================================
+disp('Simulando Modelo No Lineal (NL)...');
+simOut_NL = sim('pruebas_modelo_definitivo.slx', 'SimulationMode', 'normal');
 
-%% EXTRACCIÓN DE LOS DATOS EXPORTADOS (A prueba de errores de tipo de objeto)
-logs = simOut.logsout;
+disp('Simulando Modelo Linealizado (LTI)...');
+simOut_LTI = sim('Simulacion_Temporal_LTI.slx', 'SimulationMode', 'normal');
 
-v_qs_ref_raw   = logs.get('v_ref');       T_carga_raw    = logs.get('T_carga');
-iqs_LTI_raw    = logs.get('i_qs_LTI');    wm_LTI_raw     = logs.get('w_m_LTI');
-thetam_LTI_raw = logs.get('theta_m_LTI'); Ts_LTI_raw     = logs.get('T_s_LTI');
-Tm_LTI_raw     = logs.get('T_m_LTI');     iqs_NL_raw     = logs.get('i_qs_NL');
-wm_NL_raw      = logs.get('w_m_NL');      thetam_NL_raw  = logs.get('theta_m_NL');
-Ts_NL_raw      = logs.get('T_s_NL');      Tm_NL_raw      = logs.get('T_m_NL');
+%% =========================================================================
+%% 2. EXTRACCIÓN DE LOS DATOS EXPORTADOS (Independizados por modelo)
+%% =========================================================================
+logs_NL  = simOut_NL.logsout;
+logs_LTI = simOut_LTI.logsout;
+
+% --- Extracción de variables del Modelo No Lineal (NL) ---
+v_qs_ref_raw   = logs_NL.get('v_ref');       
+T_carga_raw    = logs_NL.get('T_carga');
+iqs_NL_raw     = logs_NL.get('i_qs_NL');      
+wm_NL_raw      = logs_NL.get('w_m_NL');      
+thetam_NL_raw  = logs_NL.get('theta_m_NL');  
+Ts_NL_raw      = logs_NL.get('T_s_NL');      
+Tm_NL_raw      = logs_NL.get('T_m_NL');      
+
+% --- Extracción de variables del Modelo Lineal (LTI) ---
+iqs_LTI_raw    = logs_LTI.get('i_qs_LTI');    
+wm_LTI_raw     = logs_LTI.get('w_m_LTI');
+thetam_LTI_raw = logs_LTI.get('theta_m_LTI'); 
+Ts_LTI_raw     = logs_LTI.get('T_s_LTI');
+Tm_LTI_raw     = logs_LTI.get('T_m_LTI');     
 
 % --- Función anónima para desempaquetar dinámicamente según el objeto ---
 unpack = @(obj) ifthen(isa(obj, 'Simulink.SimulationData.Dataset'), @() obj.getElement(1), @() obj);
 
-v_qs_ref   = unpack(v_qs_ref_raw);   T_carga    = unpack(T_carga_raw);
-iqs_LTI    = unpack(iqs_LTI_raw);    wm_LTI     = unpack(wm_LTI_raw);
-thetam_LTI = unpack(thetam_LTI_raw); Ts_LTI     = unpack(Ts_LTI_raw);
-Tm_LTI     = unpack(Tm_LTI_raw);     iqs_NL     = unpack(iqs_NL_raw);
-wm_NL      = unpack(wm_NL_raw);      thetam_NL  = unpack(thetam_NL_raw);
-Ts_NL      = unpack(Ts_NL_raw);      Tm_NL      = unpack(Tm_NL_raw);
+v_qs_ref   = unpack(v_qs_ref_raw);   
+T_carga    = unpack(T_carga_raw);
+iqs_NL     = unpack(iqs_NL_raw);     
+wm_NL      = unpack(wm_NL_raw);      
+thetam_NL  = unpack(thetam_NL_raw);  
+Ts_NL      = unpack(Ts_NL_raw);      
+Tm_NL      = unpack(Tm_NL_raw);      
+
+iqs_LTI    = unpack(iqs_LTI_raw);    
+wm_LTI     = unpack(wm_LTI_raw);
+thetam_LTI = unpack(thetam_LTI_raw); 
+Ts_LTI     = unpack(Ts_LTI_raw);     
+Tm_LTI     = unpack(Tm_LTI_raw);     
 
 %% =========================================================================
 %% FIGURA 1: GRÁFICOS DE REFERENCIAS (Eje Y aplastado)
@@ -52,7 +77,6 @@ hold off;
 ylabel('Torque [N$\cdot$m]', 'Interpreter', 'latex', 'FontSize', 10);
 xlabel('Tiempo [s]','Interpreter', 'latex', 'FontSize', 10);
 title('$T_{l}(t)$', 'Interpreter', 'latex', 'FontSize', 12);
-
 print('Pulso_Tension_y_Pulso_Torque', '-dpng', '-r300');
 
 %% =========================================================================
@@ -91,7 +115,7 @@ title(t_lti, 'Respuesta Temporal del Modelo Lineal (LTI)', 'Interpreter', 'latex
 print('resultado_control_LTI', '-dpng', '-r300');
 
 %% =========================================================================
-%% FIGURA 3: GRAFICOS VARIABLES NL (Ajustado estrictamente a 4 subplots sin temperatura)
+%% FIGURA 3: GRAFICOS VARIABLES NL (Ajustado a 4 subplots sin temperatura)
 %% =========================================================================
 figure('Units', 'inches', 'Position', [1, 1, 6, 5.5]); 
 t_nl = tiledlayout(4, 1, 'Padding', 'compact', 'TileSpacing', 'compact');
@@ -125,8 +149,8 @@ print('resultado_control_NL', '-dpng', '-r300');
 %% =========================================================================
 figure('Units', 'inches', 'Position', [1, 1, 6, 5.5]); 
 t_comp = tiledlayout(4, 1, 'Padding', 'compact', 'TileSpacing', 'compact');
-style_LTI = {'-', 'LineWidth', 1.2, 'Color', [0.65 0.80 0.95]}; 
-style_NL  = {'--', 'LineWidth', 1.0, 'Color', [0.15 0.25 0.45]}; 
+style_LTI = {'-', 'LineWidth', 1.7, 'Color', [0.65 0.80 0.95]}; 
+style_NL  = {'--', 'LineWidth', 1.4, 'Color', [0.15 0.25 0.45]}; 
 
 nexttile;
 plot(iqs_LTI.Values.Time, iqs_LTI.Values.Data, style_LTI{:}); hold on;
@@ -164,24 +188,21 @@ figure('Units', 'inches', 'Position', [1, 1, 6, 3]);
 color_rosado_LTI = [0.95 0.60 0.75]; 
 color_fucsia_NL  = [0.85 0.00 0.55]; 
 
-plot(Ts_LTI.Values.Time, Ts_LTI.Values.Data, '-', 'LineWidth', 1.2, 'Color', color_rosado_LTI); hold on;
-plot(Ts_NL.Values.Time,  Ts_NL.Values.Data,  '--', 'LineWidth', 1.0, 'Color', color_fucsia_NL); hold off;
+plot(Ts_LTI.Values.Time, Ts_LTI.Values.Data, '-', 'LineWidth', 2, 'Color', color_rosado_LTI); hold on;
+plot(Ts_NL.Values.Time,  Ts_NL.Values.Data,  '--', 'LineWidth', 1.7, 'Color', color_fucsia_NL); hold off;
 grid on;
 xlabel('Tiempo [s]', 'Interpreter', 'latex', 'FontSize', 10);
 ylabel('Temperatura [$^{\circ}$C]', 'Interpreter', 'latex', 'FontSize', 10);
-title('Comparativa de Dinámica Térmica $T_s(t)$: LTI vs. NL', 'Interpreter', 'latex','FontSize', 12)
+title('Comparativa de Dinamica Termica $T_s(t)$: LTI vs. NL', 'Interpreter', 'latex','FontSize', 12)
 
 ax = gca;
 ax.YLim = [20, max([max(Ts_LTI.Values.Data), max(Ts_NL.Values.Data)]) * 1.05];
 legend({'Modelo LTI (Linealizado)', 'Modelo NL (No Lineal)'}, 'Interpreter', 'latex', 'Location', 'best', 'FontSize', 9);
-
 print('resultado_comparativa_termica', '-dpng', '-r300');
 
-
-%% ============================================================
+%% =========================================================================
 %% CURVA PARAMÉTRICA: Torque electromagnético vs velocidad angular
-%% ============================================================
-
+%% =========================================================================
 t = thetam_NL.Values.Time;
 omega = wm_NL.Values.Data;
 Tm = Tm_NL.Values.Data;
@@ -191,14 +212,12 @@ t = t(:);
 omega = omega(:);
 Tm = Tm(:);
 
-%% Figura
 figure('Units','inches','Position',[1 1 8 5.5]);
 hold on; grid on; box on;
 
 % Límites automáticos con margen
 xmax = max(abs(omega))*1.15;
 ymax = max(abs(Tm))*1.15;
-
 xlim([-xmax xmax]);
 ylim([-ymax ymax]);
 
@@ -209,17 +228,10 @@ c3 = [0.90 0.90 1.00];   % cuadrante III
 c4 = [1.00 1.00 0.88];   % cuadrante IV
 
 % Fondos de cuadrantes
-patch([0 xmax xmax 0], [0 0 ymax ymax], c1, ...
-    'EdgeColor','none','FaceAlpha',0.35);
-
-patch([-xmax 0 0 -xmax], [0 0 ymax ymax], c2, ...
-    'EdgeColor','none','FaceAlpha',0.35);
-
-patch([-xmax 0 0 -xmax], [-ymax -ymax 0 0], c3, ...
-    'EdgeColor','none','FaceAlpha',0.35);
-
-patch([0 xmax xmax 0], [-ymax -ymax 0 0], c4, ...
-    'EdgeColor','none','FaceAlpha',0.35);
+patch([0 xmax xmax 0], [0 0 ymax ymax], c1, 'EdgeColor','none','FaceAlpha',0.35);
+patch([-xmax 0 0 -xmax], [0 0 ymax ymax], c2, 'EdgeColor','none','FaceAlpha',0.35);
+patch([-xmax 0 0 -xmax], [-ymax -ymax 0 0], c3, 'EdgeColor','none','FaceAlpha',0.35);
+patch([0 xmax xmax 0], [-ymax -ymax 0 0], c4, 'EdgeColor','none','FaceAlpha',0.35);
 
 % Ejes en cero
 xline(0,'--k','LineWidth',1);
@@ -234,44 +246,28 @@ plot(omega(end), Tm(end), 'ro', 'MarkerFaceColor','none', 'LineWidth',1.5);
 
 % Etiquetas de tiempo en algunos puntos
 idx = round(linspace(1, length(t), 6));
-
 for k = idx
     plot(omega(k), Tm(k), 'ro', 'MarkerSize',5, 'LineWidth',1.2);
-    text(omega(k), Tm(k), sprintf(' t=%.1f', t(k)), ...
-        'FontSize',8, 'FontWeight','bold');
+    text(omega(k), Tm(k), sprintf(' t=%.1f', t(k)), 'FontSize',8, 'FontWeight','bold');
 end
 
 % Títulos y etiquetas
-title('Curva paramétrica torque electromagnético vs. velocidad angular', ...
-    'FontWeight','bold');
-
+title('Curva paramétrica torque electromagnético vs. velocidad angular', 'FontWeight','bold');
 xlabel('$\omega_m(t)$ [rad/s]', 'Interpreter','latex');
 ylabel('$T_m(t)$ [N.m]', 'Interpreter','latex');
 
 % Textos de cuadrantes
-text(0.75*xmax, 0.82*ymax, ...
-    {'Cuadrante I','Motorización Directa'}, ...
-    'HorizontalAlignment','center', 'FontWeight','bold', ...
-    'BackgroundColor','w', 'EdgeColor',[0.5 0.5 0.5]);
-
-text(-0.75*xmax, 0.82*ymax, ...
-    {'Cuadrante II','Frenado Regenerativo Inverso'}, ...
-    'HorizontalAlignment','center', 'FontWeight','bold', ...
-    'BackgroundColor','w', 'EdgeColor',[0.5 0.5 0.5]);
-
-text(-0.75*xmax, -0.82*ymax, ...
-    {'Cuadrante III','Motorización Inversa'}, ...
-    'HorizontalAlignment','center', 'FontWeight','bold', ...
-    'BackgroundColor','w', 'EdgeColor',[0.5 0.5 0.5]);
-
-text(0.75*xmax, -0.82*ymax, ...
-    {'Cuadrante IV','Frenado Regenerativo Directo'}, ...
-    'HorizontalAlignment','center', 'FontWeight','bold', ...
-    'BackgroundColor','w', 'EdgeColor',[0.5 0.5 0.5]);
-
+text(0.75*xmax, 0.82*ymax, {'Cuadrante I','Motorización Directa'}, ...
+    'HorizontalAlignment','center', 'FontWeight','bold', 'BackgroundColor','w', 'EdgeColor',[0.5 0.5 0.5]);
+text(-0.75*xmax, 0.82*ymax, {'Cuadrante II','Frenado Regenerativo Inverso'}, ...
+    'HorizontalAlignment','center', 'FontWeight','bold', 'BackgroundColor','w', 'EdgeColor',[0.5 0.5 0.5]);
+text(-0.75*xmax, -0.82*ymax, {'Cuadrante III','Motorización Inversa'}, ...
+    ...
+    'HorizontalAlignment','center', 'FontWeight','bold', 'BackgroundColor','w', 'EdgeColor',[0.5 0.5 0.5]);
+text(0.75*xmax, -0.82*ymax, {'Cuadrante IV','Frenado Regenerativo Directo'}, ...
+    'HorizontalAlignment','center', 'FontWeight','bold', 'BackgroundColor','w', 'EdgeColor',[0.5 0.5 0.5]);
 hold off;
-
-print('curva parametrica', '-dpng', '-r300');
+print('curva_paramétrica', '-dpng', '-r300');
 
 % --- Función auxiliar interna para el desempaquetado condicional ---
 function res = ifthen(cond, trueFunc, falseFunc)
