@@ -2,7 +2,7 @@
 %% 1. EJECUTAR LAS SIMULACIONES DESDE EL SCRIPT
 %% =========================================================================
 disp('Simulando Modelo No Lineal (NL)...');
-simOut_NL = sim('pruebas_modelo_definitivo.slx', 'SimulationMode', 'normal');
+simOut_NL = sim('Diagramas_pruebas_modelo_definitivo.slx', 'SimulationMode', 'normal');
 
 disp('Simulando Modelo Linealizado (LTI)...');
 simOut_LTI = sim('Simulacion_Temporal_LTI.slx', 'SimulationMode', 'normal');
@@ -25,6 +25,10 @@ ias_NL_raw  = logs_NL.get('i_as_NL');  ibs_NL_raw  = logs_NL.get('i_bs_NL');  ic
 vqs_NL_raw  = logs_NL.get('v_ref');  vds_NL_raw  = logs_NL.get('v_ds_NL');  v0s_NL_raw  = logs_NL.get('v_0s_NL');
 vas_NL_raw  = logs_NL.get('v_as_NL');  vbs_NL_raw  = logs_NL.get('v_bs_NL');  vcs_NL_raw  = logs_NL.get('v_cs_NL');
 
+% --- Ángulo mecánico del rotor ---
+thetam_NL_raw  = logs_NL.get('theta_m_NL');
+thetam_LTI_raw = logs_LTI.get('theta_m_LTI');
+
 % --- Función anónima para desempaquetar dinámicamente según el objeto ---
 unpack = @(obj) ifthen(isa(obj, 'Simulink.SimulationData.Dataset'), @() obj.getElement(1), @() obj);
 
@@ -37,6 +41,9 @@ iqs_NL  = unpack(iqs_NL_raw);  ids_NL  = unpack(ids_NL_raw);  i0s_NL  = unpack(i
 ias_NL  = unpack(ias_NL_raw);  ibs_NL  = unpack(ibs_NL_raw);  ics_NL  = unpack(ics_NL_raw);
 vqs_NL  = unpack(vqs_NL_raw);  vds_NL  = unpack(vds_NL_raw);  v0s_NL  = unpack(v0s_NL_raw);
 vas_NL  = unpack(vas_NL_raw);  vbs_NL  = unpack(vbs_NL_raw);  vcs_NL  = unpack(vcs_NL_raw);
+
+thetam_NL  = unpack(thetam_NL_raw);
+thetam_LTI = unpack(thetam_LTI_raw);
 
 %% =========================================================================
 %% 3. PALETA DE COLORES REQUERIDA
@@ -318,6 +325,91 @@ xlabel('Tiempo [s]', 'Interpreter', 'latex', 'FontSize', 10);
 title('Comparativa $v_{0s}(t)$', 'Interpreter', 'latex', 'FontSize', 11);
 title(t_comp_v, 'Comparativa de Tensiones de Fase: LTI vs. NL', 'Interpreter', 'latex', 'FontSize', 12);
 print('Figura10_Comparativa_Tensiones', '-dpng', '-r300');
+
+%% =========================================================================
+%% FIGURA 11: EVOLUCIÓN TEMPORAL DEL ÁNGULO DE TORQUE delta(t) - MODELO NL
+%% =========================================================================
+
+% Se calcula:
+% delta(t) = theta_ev(t) - theta_r(t)
+% donde theta_ev se obtiene a partir del vector de tensión estatórico.
+
+% --- Tiempo base tomado desde las tensiones de fase ---
+t_delta = vas_NL.Values.Time(:);
+
+% --- Tensiones de fase del modelo NL ---
+vas = vas_NL.Values.Data(:);
+vbs = vbs_NL.Values.Data(:);
+vcs = vcs_NL.Values.Data(:);
+
+% --- Transformada de Clarke: abc -> alpha-beta ---
+v_alpha = (2/3) * (vas - 0.5*vbs - 0.5*vcs);
+v_beta  = (2/3) * ((sqrt(3)/2)*vbs - (sqrt(3)/2)*vcs);
+
+% --- Ángulo del vector espacial de tensión estatórica ---
+theta_ev = atan2(v_beta, v_alpha);
+
+% --- Ángulo mecánico del rotor ---
+t_theta = thetam_NL.Values.Time(:);
+theta_m = thetam_NL.Values.Data(:);
+
+% Si theta_m tiene distinto vector de tiempo, se interpola
+theta_m_interp = interp1(t_theta, theta_m, t_delta, 'linear', 'extrap');
+
+% --- Conversión de ángulo mecánico a eléctrico ---
+P_p = 3;
+
+theta_r = P_p * theta_m_interp;
+
+% --- Ángulo de torque ---
+delta = theta_ev - theta_r;
+
+% Envolver el ángulo al intervalo [-pi, pi]
+delta_wrapped = atan2(sin(delta), cos(delta));
+
+% Cambiar rango de representación a [-pi/2, 3*pi/2]
+delta_plot(delta_plot < -pi/2-0.1) = delta_plot(delta_plot < -pi/2-0.1) + 2*pi;
+
+% Opcional: ángulo sin saltos artificiales, útil para ver evolución continua
+delta_unwrapped = unwrap(delta_plot);
+
+% --- Gráfico del ángulo de torque envuelto ---
+figure('Units', 'inches', 'Position', [1, 1, 6, 3.2]);
+
+plot(t_delta, delta_plot, 'LineWidth', 1.4, 'Color', [0.4940 0.1840 0.5560]);
+grid on; box on;
+
+xlabel('Tiempo [s]', 'Interpreter', 'latex', 'FontSize', 10);
+ylabel('$\delta(t)$ [rad]', 'Interpreter', 'latex', 'FontSize', 10);
+title('Evolucion temporal del angulo de torque $\delta(t)$ - Modelo NL', ...
+    'Interpreter', 'latex', 'FontSize', 12);
+
+ylim([-4 8]);
+yticks([-3*pi/2 -pi -pi/2 0 pi/2 pi 3*pi/2 2*pi]);
+yticklabels({'$-3/2\pi$' '$-\pi$', '$-\pi/2$', '$0$', '$\pi/2$','$\pi$', '$3/2\pi$', '$2\pi$'});
+set(gca, 'TickLabelInterpreter', 'latex');
+
+print('Figura11_Angulo_Torque_delta_NL', '-dpng', '-r300');
+
+%% =========================================================================
+%% FIGURA 12: ÁNGULO DE TORQUE SIN ENVOLVER - MODELO NL
+%% =========================================================================
+figure('Units', 'inches', 'Position', [1, 1, 6, 3.2]);
+
+plot(t_delta, delta_unwrapped, 'LineWidth', 1.4, 'Color', [0.3010 0.7450 0.9330]);
+grid on; box on;
+
+xlabel('Tiempo [s]', 'Interpreter', 'latex', 'FontSize', 10);
+ylabel('$\delta(t)$ [rad]', 'Interpreter', 'latex', 'FontSize', 10);
+title('Evolucion continua del angulo de torque $\delta(t)$ - Modelo NL', ...
+    'Interpreter', 'latex', 'FontSize', 12);
+
+ylim([-8 5]);
+yticks([-2*pi -3*pi/2 -pi -pi/2 0 pi/2 pi 3*pi/2]);
+yticklabels({'$-2\pi$', '$-3/2 \pi$' '$-\pi$', '$-\pi/2$', '$0$', '$\pi/2$','$\pi$', '3/2\pi'});
+set(gca, 'TickLabelInterpreter', 'latex');
+
+print('Figura12_Angulo_Torque_delta_unwrapped_NL', '-dpng', '-r300');
 
 % --- Función auxiliar interna para el desempaquetado condicional ---
 function res = ifthen(cond, trueFunc, falseFunc)

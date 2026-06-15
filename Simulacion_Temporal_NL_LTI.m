@@ -2,7 +2,7 @@
 %% 1. EJECUTAR LAS SIMULACIONES DESDE EL SCRIPT
 %% =========================================================================
 disp('Simulando Modelo No Lineal (NL)...');
-simOut_NL = sim('pruebas_modelo_definitivo.slx', 'SimulationMode', 'normal');
+simOut_NL = sim('Diagramas_pruebas_modelo_definitivo.slx', 'SimulationMode', 'normal');
 
 disp('Simulando Modelo Linealizado (LTI)...');
 simOut_LTI = sim('Simulacion_Temporal_LTI.slx', 'SimulationMode', 'normal');
@@ -77,7 +77,7 @@ hold off;
 ylabel('Torque [N$\cdot$m]', 'Interpreter', 'latex', 'FontSize', 10);
 xlabel('Tiempo [s]','Interpreter', 'latex', 'FontSize', 10);
 title('$T_{l}(t)$', 'Interpreter', 'latex', 'FontSize', 12);
-print('Pulso_Tension_y_Pulso_Torque', '-dpng', '-r300');
+%print('Pulso_Tension_y_Pulso_Torque', '-dpng', '-r300');
 
 %% =========================================================================
 %% FIGURA 2: GRÁFICOS VARIABLES LTI (Eje Y aplastado, 5 subplots)
@@ -112,7 +112,7 @@ xlabel('Tiempo [s]','Interpreter', 'latex', 'FontSize', 10);
 title('$T_s(t)$', 'Interpreter', 'latex', 'FontSize', 11);
 
 title(t_lti, 'Respuesta Temporal del Modelo Lineal (LTI)', 'Interpreter', 'latex', 'FontSize', 13);
-print('resultado_control_LTI', '-dpng', '-r300');
+%print('resultado_control_LTI', '-dpng', '-r300');
 
 %% =========================================================================
 %% FIGURA 3: GRAFICOS VARIABLES NL (Ajustado a 4 subplots sin temperatura)
@@ -142,7 +142,7 @@ xlabel('Tiempo [s]','Interpreter', 'latex', 'FontSize', 10);
 title('$T_m(t)$', 'Interpreter', 'latex', 'FontSize', 11);
 
 title(t_nl, 'Respuesta Temporal del Modelo No Lineal (NL)', 'Interpreter', 'latex', 'FontSize', 13);
-print('resultado_control_NL', '-dpng', '-r300');
+%print('resultado_control_NL', '-dpng', '-r300');
 
 %% =========================================================================
 %% FIGURA 4: GRÁFICOS COMPARATIVOS ELÉCTRICOS Y MECÁNICOS (Eje Y aplastado)
@@ -179,7 +179,7 @@ xlabel('Tiempo [s]','Interpreter', 'latex', 'FontSize', 10);
 title('$T_m(t)$', 'Interpreter', 'latex', 'FontSize', 11);
 
 title(t_comp, 'Comparativa de Respuesta Temporal: Modelo LTI vs. NL', 'Interpreter', 'latex', 'FontSize', 13);
-print('resultado_comparativa_LTI_NL', '-dpng', '-r300');
+%print('resultado_comparativa_LTI_NL', '-dpng', '-r300');
 
 %% =========================================================================
 %% FIGURA 5: COMPARATIVA TÉRMICA (Aislada y optimizada)
@@ -198,7 +198,7 @@ title('Comparativa de Dinamica Termica $T_s(t)$: LTI vs. NL', 'Interpreter', 'la
 ax = gca;
 ax.YLim = [20, max([max(Ts_LTI.Values.Data), max(Ts_NL.Values.Data)]) * 1.05];
 legend({'Modelo LTI (Linealizado)', 'Modelo NL (No Lineal)'}, 'Interpreter', 'latex', 'Location', 'best', 'FontSize', 9);
-print('resultado_comparativa_termica', '-dpng', '-r300');
+%print('resultado_comparativa_termica', '-dpng', '-r300');
 
 %% =========================================================================
 %% CURVA PARAMÉTRICA: Torque electromagnético vs velocidad angular
@@ -244,11 +244,28 @@ plot(omega, Tm, 'b', 'LineWidth', 1.4);
 plot(omega(1), Tm(1), 'ro', 'MarkerFaceColor','none', 'LineWidth',1.5);
 plot(omega(end), Tm(end), 'ro', 'MarkerFaceColor','none', 'LineWidth',1.5);
 
-% Etiquetas de tiempo en algunos puntos
-idx = round(linspace(1, length(t), 6));
-for k = idx
-    plot(omega(k), Tm(k), 'ro', 'MarkerSize',5, 'LineWidth',1.2);
-    text(omega(k), Tm(k), sprintf(' t=%.1f', t(k)), 'FontSize',8, 'FontWeight','bold');
+% Tiempos específicos a marcar
+t_mark = [0.1 0.3 0.5 0.7 0.9 1.1 1.3 1.5 1.7 1.9];
+
+% Buscar el índice más cercano a cada tiempo
+idx = zeros(size(t_mark));
+
+for i = 1:length(t_mark)
+    [~, idx(i)] = min(abs(t - t_mark(i)));
+end
+
+% Dibujar puntos y etiquetas
+for i = 1:length(idx)
+    k = idx(i);
+
+    plot(omega(k), Tm(k), 'ro', ...
+        'MarkerSize', 5, ...
+        'MarkerFaceColor', 'w', ...
+        'LineWidth', 1.2);
+
+    text(omega(k), Tm(k), sprintf(' t=%.1f', t(k)), ...
+        'FontSize', 8, ...
+        'FontWeight', 'bold');
 end
 
 % Títulos y etiquetas
