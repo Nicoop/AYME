@@ -64,6 +64,10 @@ b_eq = b_m + (1/r^2)*b_l;
 
 %% Parametros para ubicacion de polos
 
-R_q=5000;
-R_d=5000;
-R_0=5000;
+R_q=29;
+R_d=33;
+R_0=4;
+
+b_a=0.0396;
+k_sa=31.656;
+k_sia=10130;
