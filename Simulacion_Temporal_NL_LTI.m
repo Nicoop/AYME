@@ -193,7 +193,7 @@ plot(Ts_NL.Values.Time,  Ts_NL.Values.Data,  '--', 'LineWidth', 1.7, 'Color', co
 grid on;
 xlabel('Tiempo [s]', 'Interpreter', 'latex', 'FontSize', 10);
 ylabel('Temperatura [$^{\circ}$C]', 'Interpreter', 'latex', 'FontSize', 10);
-title('Comparativa de Dinámica Térmica $T_s(t)$: LTI vs. NL', 'Interpreter', 'latex','FontSize', 12)
+title('Comparativa de Dinamica Termica $T_s(t)$: LTI vs. NL', 'Interpreter', 'latex','FontSize', 12)
 
 ax = gca;
 ax.YLim = [20, max([max(Ts_LTI.Values.Data), max(Ts_NL.Values.Data)]) * 1.05];
