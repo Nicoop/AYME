@@ -1,10 +1,10 @@
 %% Parámetros del brazo robot
 
 %momento de inercia
-J_l = 0.0833; %[kg.m^2] % Jl = 0.0833 + [0 ... 0.375]
+J_l = 0.0833+0.375; %[kg.m^2] % Jl = 0.0833 + [0 ... 0.375]
 
 %coef friccion viscosa articulacion
-b_l = 0.1; % [Nm/(rad/s)] % b_l = (0.1 +/- 0.03)
+b_l = 0.103; % [Nm/(rad/s)] % b_l = (0.1 +/- 0.03)
 
 %coeficiente en torque de carga
 k_l = 0.25; % K_l = 0.25 + [0 ... 0.75]
@@ -58,7 +58,7 @@ R_tsamb = 146.7; %[C/W]
 
 %% Parametros mecanicos combinados
 
-J_eq = J_m + (1/r^2)*J_l;
+J_eq = J_m + (1/r^2)*J_l
 
 b_eq = b_m + (1/r^2)*b_l;
 
