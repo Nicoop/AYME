@@ -4,7 +4,7 @@
 J_l = 0.0833; %[kg.m^2] % Jl = 0.0833 + [0 ... 0.375]
 
 %coef friccion viscosa articulacion
-b_l = 0.103; % [Nm/(rad/s)] % b_l = (0.1 +/- 0.03)
+b_l = 0.1; % [Nm/(rad/s)] % b_l = (0.1 +/- 0.03)
 
 %coeficiente en torque de carga
 k_l = 0.25; % K_l = 0.25 + [0 ... 0.75]
@@ -73,3 +73,6 @@ k_sa=31.656;
 k_sia=10130;
 ke_theta=6400;
 ke_w=10240000;
+kem_w=9600;
+kem_theta=30720000;
+kem_i=32768000000;
